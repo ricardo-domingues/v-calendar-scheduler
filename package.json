@@ -1,5 +1,5 @@
 {
-  "name": "v-calendar-scheduler",
+  "name": "ricardodomingues",
   "version": "0.7.4",
   "license": "MIT",
   "description": "Calendar scheduler component for VueJs",
@@ -14,7 +14,7 @@
     "build-autoprefix": "postcss --use autoprefixer --map false --output lib/main.css lib/main.css",
     "build-clean": "rimraf lib",
     "build-sass": "node-sass --output-style compressed --source-map true scss/main.scss lib/main.css --importer node_modules/node-sass-import",
-    "deploy": "npm run build && npm run docs",
+    "deploy": "npm run build",
     "start": "npm run build-sass -- --watch",
     "start-test": "npm run test-sass -- --watch",
     "docs:dev": "vuepress dev docs",
