@@ -140,8 +140,7 @@
             //  Initial setup
             this.activeView = this.initialView;
             this.activeDate = moment(this.initialDate);
-
-            console.log('mounted');
+            console.log('ricardo domingues')
             
             //  Bind events
             this.bindEvents();
