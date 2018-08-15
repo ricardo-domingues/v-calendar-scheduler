@@ -10,6 +10,8 @@ $v-cal-blue: #3B86FF;
 $v-cal-font-color: $v-cal-blueish-grey !default;
 $v-cal-primary: $v-cal-blue !default;
 
+$v-availability-primary: #8DA399;
+
 //  Title
 $v-cal-title-font-size: 18px !default;
 
@@ -68,6 +70,11 @@ $v-cal-event-padding: 7px $v-cal-event-padding-sides;
 
 $v-cal-event-week-padding: 3px 14px;
 $v-cal-event-week-font-size: .9rem;
+
+//Availabilities
+
+$v-cal-event-bg: $v-availability-primary !default;
+$v-cal-event-color: $white !default;
 
 //  Time marker
 $v-cal-time-marker-color: $v-cal-primary !default;
