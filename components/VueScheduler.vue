@@ -49,6 +49,14 @@
                 type: Array,
                 default: () => []
             },
+            availabilities: {
+                type: Array,
+                default: () => []
+            },
+            calendarType: {
+                type: String,
+                default: () => 'events'
+            },
             showTodayButton: {
                 type: Boolean,
                 default: () => config.showTodayButton
@@ -140,8 +148,6 @@
             //  Initial setup
             this.activeView = this.initialView;
             this.activeDate = moment(this.initialDate);
-            console.log('ricardo domingues')
-            
             //  Bind events
             this.bindEvents();
         },
@@ -149,12 +155,14 @@
             EventBus.$off('day-clicked');
             EventBus.$off('time-clicked');
             EventBus.$off('event-clicked');
+            EventBus.$off('availability-clicked');
         },
         methods: {
             openEventDialog(data) {
                 if ( !this.disableDialog ) {
 
                     const { fields, ...config } = this.eventDialogConfig;
+                    console.log(config);
 
                     if ( data instanceof Date ) {
                         config.date = data
@@ -166,74 +174,22 @@
 
                     EventDialog.show(config, fields)
                         .$on('event-created', (event) => {
-                            this.events.push(event._e);
-                            this.$emit('event-created', event._e);
-                        });
+                            /*
+                            if(this.calendarType === 'availabilities'){
+                                var availability = {
+                                    date: moment(event.date).format('YYYY-MM-DD'),//moment(event.date, 'YYYY-MM-DD'),
+                                    start_time: moment(event.startTime).format('HH:mm:ss'),
+                                    end_time: moment(event.endTime).format('HH:mm:ss')
+                                }
+                                console.log()
+                                this.availabilities.push(availability);
 
-                    // EventDialog.show({
-                    //     title: 'Custom dialog',
-                    //     createButtonLabel: 'Save'
-                    // }, [
-                    //     // {
-                    //     //     name: 'text_field',
-                    //     //     label: 'Text field'
-                    //     // },
-                    //     // {
-                    //     //     name: 'email',
-                    //     //     type: 'email'
-                    //     // },
-                    //     // {
-                    //     //     name: 'password',
-                    //     //     type: 'password'
-                    //     // },
-                    //     // {
-                    //     //     name: 'is_checked',
-                    //     //     type: 'checkbox'    //  Unsupported for now
-                    //     // },
-                    //     // {
-                    //     //     name: 'check_choices[]',
-                    //     //     type: 'checkbox',           //  Unsupported for now
-                    //     //     choices: [
-                    //     //         { label: 'Choice 1', value: 'choice1' },
-                    //     //         { label: 'Choice 2', value: 'choice2' }
-                    //     //     ]
-                    //     // },
-                    //     // {
-                    //     //     name: 'radio_choices',
-                    //     //     type: 'radio',                //  Unsupported for now
-                    //     //     choices: [
-                    //     //         { label: 'Radio 1', value: 'rad1' },
-                    //     //         { label: 'Radio 2', value: 'rad2' }
-                    //     //     ]
-                    //     // },
-                    //     // {
-                    //     //     name: 'textarea',
-                    //     //     type: 'textarea'
-                    //     // }
-                    //     {
-                    //         name: 'single-select',
-                    //         type: 'select',                                              //  Unsupported for now
-                    //         choices: [
-                    //             { value: 'single1', label: 'Single list 1' },
-                    //             { value: 'single2', label: 'Single list 2' },
-                    //             { value: 'single3', label: 'Single list 3' },
-                    //             { value: 'single4', label: 'Single list 4' },
-                    //             { value: 'single5', label: 'Single list 5' }
-                    //         ]
-                    //     },
-                    //     {
-                    //         name: 'multiple-select',
-                    //         type: 'select',                                                  //  Unsupported for now
-                    //         choices: [
-                    //             { value: 'multiple1', label: 'Multiple list 1' },
-                    //             { value: 'multiple2', label: 'Multiple list 2' },
-                    //             { value: 'multiple3', label: 'Multiple list 3' },
-                    //             { value: 'multiple4', label: 'Multiple list 4' },
-                    //             { value: 'multiple5', label: 'Multiple list 5' }
-                    //         ],
-                    //         multiple: true
-                    //     }
-                    // ]);
+                            }else{
+                                this.events.push(event._e);    
+                            }
+                            */
+                            this.$emit('event-created', event);
+                        });
                 }
             },
             bindEvents() {
@@ -247,6 +203,9 @@
                 });
                 EventBus.$on('event-clicked', (event) => {
                     this.$emit('event-clicked', event._e);
+                });
+                EventBus.$on('availability-clicked', (event) => {
+                    this.$emit('availability-clicked', event);
                 });
             },
             goToToday() {
@@ -309,13 +268,15 @@
                     use12: this.use12,
                     events: this.newEvents.filter( event => {
                         return event.date.isSame(this.activeDate, this.activeView);
-                    })
+                    }),
+                    availabilities: this.availabilities
                 };
 
                 if ( this.activeView === 'week' || this.activeView === 'day') {
                     props.allDayLabel = this.labels.all_day;
                     props.timeRange = this.timeRange;
                     props.showTimeMarker = this.showTimeMarker;
+                    props.availabilities = this.availabilities;
                 }
                 return props;
             },

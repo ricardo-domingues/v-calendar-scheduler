@@ -17,6 +17,9 @@ export default {
         use12: {
             type: Boolean,
             required: true
+        },
+        availabilities: {
+            type: Array
         }
     },
     methods: {
@@ -26,6 +29,12 @@ export default {
 
             if ( this.minDate && this.minDate.isAfter(day, 'day') ) return true;
             if ( this.maxDate && this.maxDate.isBefore(day, 'day') ) return true;
+        },
+        isAvailable(day){
+            return this.availabilities.filter(availability => {
+                console.log(day.isSame(availability.day));
+              return day.isSame(availability.day);
+            }) > 0;
         }
     },
     watch: {
