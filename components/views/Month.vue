@@ -20,8 +20,17 @@
                             :has-dynamic-size="false"
                             :event="event"
                             :use12="use12"
-                    >
+                            :class="{'has-appointment': isAvailable(day, event) }">
                     </event-item>
+                    <availability-item
+                        v-for="event, index in day.availabilities"
+                        :id="`v-cal-appointment-${index}`"
+                        :key="index"
+                        :has-dynamic-size="false"
+                        :event="event"
+                        :use12="use12"
+                        :class="isAvailable(day, event)">
+                </availability-item>
                     <!--@click.stop="eventBus.$emit('event-clicked', event)" -->
                 </div>
             </div>
@@ -34,12 +43,13 @@
     import moment from 'moment';
     import { EventBus } from '../EventBus';
     import EventItem from '../EventItem';
+    import AvailabilityItem from '../AvailabilityItem';
     import IsView from '../mixins/IsView';
 
     export default {
         name: "month",
         mixins: [ IsView ],
-        components: { EventItem },
+        components: { EventItem, AvailabilityItem },
         data() {
             return {
                 weekdays: moment.weekdaysShort(),
@@ -52,6 +62,33 @@
         methods: {
             dayClicked(day) {
                 EventBus.$emit('day-clicked', day.d.toDate())
+            },
+            isAvailable(date, event){
+                let day = date.d.format('YYYY-MM-DD')
+                //let formatedHour = moment(time).format('HH:mm');
+
+                if(!event.appointments){
+                    return 'is-available'
+                }
+
+                if(event.appointments.length > 0){
+                    for(var i = 0; i < event.appointments.length; i++){
+                        let endTime = moment(event.appointments[i].endTime, 'HH:mm:ss');
+                        let nextStartTime;
+
+                        if(i === event.appointments.length - 1){
+                            nextStartTime = moment(event.endTime, 'HH:mm:ss');
+                        }else{
+                            nextStartTime = moment(event.appointments[i + 1].startTime, 'HH:mm:ss');
+                        }
+
+                        if(nextStartTime && moment.duration(nextStartTime.diff(endTime)).asMinutes() >= 30){
+                            return 'has-appointment'
+                        }
+
+                        return 'has-appointment is-full'
+                    }
+                }
             },
             buildCalendar() {
                 this.calendar = [];
@@ -72,6 +109,12 @@
                         isToday: temp.isSame( now, 'day' ),
                         isDisabled: this.isDayDisabled(temp),
                         events: this.events.filter( e => moment(e.date).isSame(day, 'day') )
+                            .sort( (a, b) => {
+                                if ( !a.startTime ) return -1;
+                                if ( !b.startTime ) return 1;
+                                return moment(a.startTime, 'HH:mm').format('HH') - moment(b.startTime, 'HH:mm').format('HH');
+                            }),
+                        availabilities: this.availabilities.filter( e => moment(e.date).isSame(day, 'day') )
                             .sort( (a, b) => {
                                 if ( !a.startTime ) return -1;
                                 if ( !b.startTime ) return 1;
@@ -101,7 +144,7 @@
 
                 // Merge in the array of days
                 items.push.apply( items, this.days );
-
+                
                 // Some padding at the end if required
                 if ( items.length % 7 ) {
                     for ( let p = ( 7 - ( items.length % 7 ) ); p > 0; p-- )
@@ -115,7 +158,7 @@
                         temp.add( 1, 'day' );
                     }
                 }
-
+                
                 // Split the array into "chunks" of seven
                 this.calendar  = items.map( function( e, i ) {
                     return i % 7 === 0 ? items.slice( i, i + 7 ) : null;
@@ -126,5 +169,15 @@
 </script>
 
 <style scoped>
+.has-appointment{
+    border-left: 5px solid orange;
+}
 
+.is-available{
+    border-left: 5px solid green;
+}
+
+.is-full{
+    border-left: 5px solid red;
+}
 </style>

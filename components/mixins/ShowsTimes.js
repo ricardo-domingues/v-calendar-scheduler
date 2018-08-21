@@ -23,12 +23,14 @@ export default {
   computed: {
     times() {
       let times = [];
-
+      console.log(this.timeRange)
       for ( let i = this.timeRange[0]; i < this.timeRange[1] + 1; i++ ) {
-        const momentTime = moment(i, 'HH');
+        const momentTime = moment(i, 'HH:mm');
+        //onst momentTime2 = moment(i, 'HH:mm').add(30, 'minutes')
         times.push(momentTime);
+        //times.push(momentTime2);
       }
-
+      console.log(times)
       return times;
     },
     hourClass() {

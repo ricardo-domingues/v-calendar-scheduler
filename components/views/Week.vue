@@ -14,12 +14,12 @@
     <div class="v-cal-days">
 
       <div class="v-cal-times">
-        <!--<div class="v-cal-hour all-day">{{ allDayLabel }}</div>-->
+        <div class="v-cal-hour all-day">{{ allDayLabel }}</div>
         <div class="v-cal-hour" :class="{ 'is-now': time.isSame(now, 'hour') }" v-for="time in times">{{ time | formatTime(use12) }}</div>
       </div>
       <div class="v-cal-days__wrapper">
         <div class="v-cal-day v-cal-day--week" v-for="day in days" :class="{'is-disabled': day.isDisabled}">
-          <div class="v-cal-day__hour-block all-day"
+          <div class="v-cal-day__hour-block"
                @click="timeClicked({ date: day.d.toDate(), time: null })">
             <span class="v-cal-day__hour-block-fill">00:00 <template v-if="use12">PM</template></span>
             <div class="v-cal-day__hour-content">
@@ -29,7 +29,8 @@
                         :key="index"
                         :event="event"
                         :has-dynamic-size="false"
-                        :use12="use12">
+                        :use12="use12"
+                        :class="{'has-appointment': isAvailable(day, event) }">
                 </event-item>
 
               </div>
@@ -38,7 +39,7 @@
 
           <div class="v-cal-day__hour-block"
                @click="timeClicked({ date: day.d.toDate(), time: time.hour() })"
-               :class="[ time.hour() === now.hour() ? 'is-now' : '', hourClass, isAvailable(time.hour(), day, time) ? 'is-disable' : '']" v-for="time in day.availableTimes">
+               :class="[ time.hour() === now.hour() ? 'is-now' : '', hourClass]" v-for="(time, index) in day.availableTimes">
             <span class="v-cal-day__hour-block-fill">{{ time | formatTime(use12) }}</span>
             <div class="v-cal-day__hour-content">
               <div class="v-cal-event-list">
@@ -51,9 +52,11 @@
                 </event-item>
                 <availability-item
                         v-for="event, index in day.availabilities"
+                        :id="`v-cal-appointment-${index}`"
                         :key="index"
                         :event="event"
                         :use12="use12"
+                        :class="isAvailable(day, time, event)"
                         v-if="event.startTime && time.hours() === event.startTime.hours()">
                 </availability-item>
               </div>
@@ -91,16 +94,29 @@
             timeClicked(data) {
                 EventBus.$emit('time-clicked', data)
             },
-            isAvailable(hour, date, time){
+            isAvailable(date, time, event){
+                let day = date.d.format('YYYY-MM-DD')
                 let formatedHour = moment(time).format('HH:mm');
 
-                for(var i = 0; i < this.availabilities.length; i++){
-                    let day = moment(this.availabilities[i].date).date()
-                    if(day === date.d.date()){
-                        if(this.availabilities[i].start_time <= formatedHour && this.availabilities[i].end_time >= formatedHour){
-                            return true;
-                        }
+                if(!event.appointments || event.appointments.length === 0){
+                    return 'is-available'
+                }
+
+                for(var i = 0; i < event.appointments.length; i++){
+                    let endTime = moment(event.appointments[i].endTime, 'HH:mm:ss');
+                    let nextStartTime;
+
+                    if(i === event.appointments.length - 1){
+                        nextStartTime = moment(event.endTime, 'HH:mm:ss');
+                    }else{
+                        nextStartTime = moment(event.appointments[i + 1].startTime, 'HH:mm:ss');
                     }
+
+                    if(nextStartTime && moment.duration(nextStartTime.diff(endTime)).asMinutes() >= 30){
+                        return 'has-appointment'
+                    }
+
+                    return 'has-appointment is-full'
                 }
             },
             buildCalendar() {
@@ -158,6 +174,9 @@
                     temp.add( 1, 'day' );
                 } while ( temp.week() === w );
 
+            },
+            hasAppointment (day, event, time){
+                return true
             }
         },
         watch: {
@@ -169,9 +188,25 @@
 </script>
 
 <style scoped>
+/*
 .is-disable{
-    background-color: #8DA399 !important;
+    background-color: #d8a0ab !important;
+    border-left: 5px solid red !important;
     cursor: pointer;
+    z-index:10;
+}
+*/
+
+.has-appointment{
+    border-left: 5px solid orange;
+}
+
+.is-available{
+    border-left: 5px solid green;
+}
+
+.is-full{
+    border-left: 5px solid red;
 }
 
 </style>

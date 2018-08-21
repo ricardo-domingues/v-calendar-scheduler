@@ -32,7 +32,6 @@ export default {
         },
         isAvailable(day){
             return this.availabilities.filter(availability => {
-                console.log(day.isSame(availability.day));
               return day.isSame(availability.day);
             }) > 0;
         }

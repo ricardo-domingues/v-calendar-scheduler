@@ -27,7 +27,7 @@
 <script>
 
     import Event from '../model/Event';
-
+    import Availability from '../model/Availability';
 
     import config from '../utils/config';
     import { defaultLabels, defaultViews } from '../utils/config';
@@ -128,6 +128,10 @@
                 type: [String, Function],
                 default: () => config.eventDisplay
             },
+            avaidisplay: {
+                type: [String, Function],
+                default: () => config.availabilityDisplay
+            },
             disableDialog: {
                 type: Boolean,
                 default: false
@@ -162,7 +166,6 @@
                 if ( !this.disableDialog ) {
 
                     const { fields, ...config } = this.eventDialogConfig;
-                    console.log(config);
 
                     if ( data instanceof Date ) {
                         config.date = data
@@ -174,20 +177,6 @@
 
                     EventDialog.show(config, fields)
                         .$on('event-created', (event) => {
-                            /*
-                            if(this.calendarType === 'availabilities'){
-                                var availability = {
-                                    date: moment(event.date).format('YYYY-MM-DD'),//moment(event.date, 'YYYY-MM-DD'),
-                                    start_time: moment(event.startTime).format('HH:mm:ss'),
-                                    end_time: moment(event.endTime).format('HH:mm:ss')
-                                }
-                                console.log()
-                                this.availabilities.push(availability);
-
-                            }else{
-                                this.events.push(event._e);    
-                            }
-                            */
                             this.$emit('event-created', event);
                         });
                 }
@@ -195,11 +184,11 @@
             bindEvents() {
                 EventBus.$on('day-clicked', (date) => {
                     this.$emit('day-clicked', date);
-                    this.openEventDialog(date);
+                    //this.openEventDialog(date);
                 });
                 EventBus.$on('time-clicked', (data) => {
                     this.$emit('time-clicked', data);
-                    this.openEventDialog(data);
+                    //this.openEventDialog(data);
                 });
                 EventBus.$on('event-clicked', (event) => {
                     this.$emit('event-clicked', event._e);
@@ -246,6 +235,11 @@
                     return new Event(e).bindGetter('displayText', this.eventDisplay);
                 });
             },
+            newAvailabilities () {
+                return this.availabilities.map(a => {
+                    return new Availability(a).bindGetter('displayText', this.availabilityDisplay);
+                })
+            },
             isPrevAllowed() {
                 if ( this.minDate ) {
                     const prevRef = moment(this.activeDate).subtract(1, this.activeView + 's');
@@ -269,7 +263,9 @@
                     events: this.newEvents.filter( event => {
                         return event.date.isSame(this.activeDate, this.activeView);
                     }),
-                    availabilities: this.availabilities
+                    availabilities: this.newAvailabilities.filter( availability => {
+                        return availability.date.isSame(this.activeDate, this.activeView);
+                    }),
                 };
 
                 if ( this.activeView === 'week' || this.activeView === 'day') {

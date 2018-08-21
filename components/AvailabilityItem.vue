@@ -1,16 +1,29 @@
 <template>
-    
-    <div ref="event_block" class="v-cal-event-item custom-availability"
-         :title="event.startTime | formatEventTime(use12) + ' - ' + event.displayText"
+    <div ref="event_block" class="v-cal-event-item custom-availability-filled"
+         :title="event.startTime | formatEventTime(use12) + 'h - ' + event.staff.name + ' - ' + event.entity + ' - ' + event.local.room +' - ' + event.service.name" 
          :class="eventClasses"
          @click.stop="availabilityClicked"
          :style="eventStyles">
-        <span class="v-cal-event-time">{{ event.startTime | formatEventTime(use12) }}</span>
-        <span class="v-cal-event-name">{{ event.displayText }}</span>
+         <div class="row">
+            <div class="col-md-12 col-xl-12">
+                <span class="v-cal-event-time vuestic-icon vuestic-icon-time"></span>
+                <span class="v-cal-event-time" >{{ event.startTime | formatEventTime(use12) }}h - {{ event.endTime | formatEventTime(use12) }}h</span>
+            </div>
+            <div class="col">
+                <span class="v-cal-event-name">{{ event.staff.name }}</span>
+            </div>
+            <div class="col">
+                 <span class="v-cal-event-name">{{ event.local.room }}</span>
+            </div>
+            <!--<div class="col">
+                <span class="v-cal-event-name">{{ event.service.name }}</span>
+            </div>-->
+         </div>
     </div>
 </template>
 
 <script>
+    import Vue from 'vue'
     import moment from 'moment';
     import { EventBus } from './EventBus';
 
@@ -32,10 +45,13 @@
         },
         data() {
             return {
-                ancestorHeight: 0
+                ancestorHeight: 0,
+                lastDrawPoint: 0,
+                linearGradientString: ''
             }
         },
         mounted() {
+            // this.getAndSetAncestorHeight();
             if ( this.hasDynamicSize ) {
                 this.getAndSetAncestorHeight();
                 window.addEventListener('resize', this.getAndSetAncestorHeight);
@@ -55,6 +71,9 @@
             findAncestor (el, cls) {
                 while ((el = el.parentElement) && !el.classList.contains(cls)) ;
                 return el;
+            },
+            calculateHeight (start, end, value) {
+                return (1 - value) * start + value * end
             }
         },
         computed: {
@@ -64,10 +83,10 @@
 
                 const hours = end.diff(this.event.startTime, 'hours', true);
                 const bordersOffset = hours - 1;
-                return  ( hours * this.ancestorHeight ) + bordersOffset;
+                return  ( hours * this.ancestorHeight ) + bordersOffset ;
             },
             eventStyles() {
-
+                
                 let styles = [];
                 styles.push({
                     'backgroundColor': this.event.color,
@@ -94,6 +113,77 @@
                         });
                     }
                 }
+                
+                if(this.event.appointments && this.event.appointments.length > 0){
+                    
+                    let intervals = []
+                    
+                    let diffInMinutes = this.event.endTime.diff(this.event.startTime, 'minutes')
+                    let initialMoment = moment(this.event.startTime).format('HH:mm:ss')
+
+                    for(var i = 0; i < this.event.appointments.length; i++){
+                        
+                        let initial = moment(this.event.appointments[i].startTime, 'HH:mm:ss')
+                        let final = moment(this.event.appointments[i].endTime, 'HH:mm:ss')
+                        //console.log(initial)
+
+                        let initialDraw = initial.diff(moment(initialMoment, 'HH:mm:ss'),'minutes')
+                        let finalDraw = final.diff(moment(initialMoment, 'HH:mm:ss'), 'minutes')
+                         // console.log(initialDraw / diffInMinutes)
+                        // console.log(finalDraw)
+                        let height1 = this.calculateHeight(0, this.displayHeight, initialDraw / diffInMinutes)
+                        let height2 = this.calculateHeight(0, this.displayHeight, finalDraw / diffInMinutes)
+                        // console.log(initialDraw / diffInMinutes)
+                        // console.log(finalDraw / diffInMinutes)
+
+                        let initialColor = (initialDraw / diffInMinutes) * 100
+                        let finalColor = (finalDraw / diffInMinutes) * 100
+
+                        intervals.push(initialColor)
+                        intervals.push(finalColor)
+                        /*
+                        if(i === 0){
+                            this.linearGradientString += 'linear-gradient(#0a68ff 0%, #0a68ff, ' + initialColor + '%, #d64649 '
+                        }else{
+                            if(i !== this.event.appointments.length - 1){
+                                this.linearGradientString += ''
+                            }
+                        }
+                        */
+                        
+                        
+                        /*
+                        styles.push({
+                            'background': 'linear-gradient(#0a68ff 0%, #0a68ff '+initialColor+'%, #d64649 '+initialColor+ '%, #d64649 ' + finalColor + '%, #0a68ff '+ finalColor +'%, #0a68ff 100%)'
+                        })
+                        */
+                        
+                        // this.lastDrawPoint = finalColor
+
+                    }
+                    /*
+                    for(var index in intervals){
+                        
+                        let colorPercentage = intervals[index]
+                        
+                        if(index == 0){
+                            this.linearGradientString += 'linear-gradient(#0a68ff 0%, #0a68ff, ' + colorPercentage + '%, #d64649 '
+                        }else{
+                            if(i != this.event.appointments.length - 1){
+                                this.linearGradientString += colorPercentage + '%, #0a68ff ' + colorPercentage + ' %, #d64649 '
+                            }
+                        }
+                        console.log(intervals[index])
+                    }
+                    */
+                    /*
+                    var component = new MyComponent().$mount()
+                    //let element = this.findAncestor(this.$refs.event_block, 'v-cal-day__hour-content')
+                    console.log(document.getElementById('v-cal-appointment-1'))
+                    document.getElementById('v-cal-appointment-1').appendChild(component.$el)
+                    */
+
+                }
 
                 return styles;
             },
@@ -118,8 +208,24 @@
 </script>
 
 <style scoped>
+
 .custom-availability{
-    background-color: #8DA399 !important;
-    background: linear-gradient(0,0,0) !important;
+    background-color: #EAF0CE !important;
 }
+/*
+
+
+
+.custom-availability-filled{
+    border: 1px solid green;
+}
+*/
+.custom-availability-filled{
+    background-color: #29c4a9 !important;
+}
+
+.v-cal-event-name{
+    
+}
+
 </style>
