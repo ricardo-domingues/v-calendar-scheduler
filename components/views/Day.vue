@@ -16,13 +16,6 @@
                         <span class="v-cal-day__hour-block-fill">{{ time | formatTime(use12) }}</span>
                         <div class="v-cal-day__hour-content">
                             <div class="v-cal-event-list">
-                                <event-item
-                                        v-for="event, index in day.events"
-                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm')"
-                                        :key="index"
-                                        :event="event"
-                                        :use12="use12">
-                                </event-item>
                                 <availability-item
                                         v-for="event, index in day.availabilities"
                                         v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm')"
@@ -31,6 +24,14 @@
                                         :use12="use12"
                                         :class="isAvailable(time, event)">
                                 </availability-item>
+                                <event-item
+                                        v-for="event, index in day.events"
+                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm')"
+                                        :key="index"
+                                        :event="event"
+                                        :use12="use12"
+                                        class="event-item-cal">
+                                </event-item>
                             </div>
                         </div>
                     </div>
@@ -68,6 +69,10 @@
                 //let day = date.d.format('YYYY-MM-DD')
                 let formatedHour = moment(time).format('HH:mm');
 
+                if(!this.showBorders){
+                    return
+                }
+
                 if(!event.appointments || event.appointments.length === 0){
                     return 'is-available'
                 }
@@ -86,7 +91,9 @@
                         return 'has-appointment'
                     }
 
-                    return 'has-appointment is-full'
+                    if(i === event.appointments.length - 1){
+                        return 'has-appointment is-full'
+                    }
                 }
             },
             buildCalendar() {
@@ -116,7 +123,6 @@
                     event.overlaps = dayAvailabilities.filter( e => moment(event.startTime, 'HH:mm').isBetween( moment(e.startTime, 'HH:mm'), moment(e.endTime, 'HH:mm') ) && e !== event ).length;
                     return event;
                 });
-                console.log(mappedAvailabilities)
 
                 this.day = {
                     d: today,
@@ -132,8 +138,13 @@
 </script>
 
 <style scoped>
+.v-cal-event-list{
+    position: relative!
+}
+
 .has-appointment{
     border-left: 5px solid orange;
+    position: static;
 }
 
 .is-available{
@@ -142,5 +153,12 @@
 
 .is-full{
     border-left: 5px solid red;
+}
+
+.event-item-cal{
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
 }
 </style>

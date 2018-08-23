@@ -79,7 +79,10 @@ export default function Event(plainEvent) {
         set: (nEndTime) => { _endTime = nEndTime; _e.endTime = nEndTime.format('HH:mm') }
     });
 
-    Object.defineProperty(this, 'overlaps', { get: () => _overlaps, set: (nOverlaps) => { _overlaps = nOverlaps; }});
+    Object.defineProperty(this, 'overlaps', {
+        get: () => _overlaps,
+        set: (nOverlaps) => { _overlaps = nOverlaps; }
+    });
 
     Object.defineProperty(this, 'bindGetter', {
         get: () => function (attr, value) {

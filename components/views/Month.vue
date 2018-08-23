@@ -65,7 +65,6 @@
             },
             isAvailable(date, event){
                 let day = date.d.format('YYYY-MM-DD')
-                //let formatedHour = moment(time).format('HH:mm');
 
                 if(!event.appointments){
                     return 'is-available'
@@ -77,16 +76,20 @@
                         let nextStartTime;
 
                         if(i === event.appointments.length - 1){
+                            console.log('entrou')
                             nextStartTime = moment(event.endTime, 'HH:mm:ss');
                         }else{
+                            console.log('entrou2')
                             nextStartTime = moment(event.appointments[i + 1].startTime, 'HH:mm:ss');
                         }
 
                         if(nextStartTime && moment.duration(nextStartTime.diff(endTime)).asMinutes() >= 30){
                             return 'has-appointment'
                         }
-
-                        return 'has-appointment is-full'
+                        
+                        if(i === event.appointments.length - 1){
+                            return 'has-appointment is-full'    
+                        }                        
                     }
                 }
             },

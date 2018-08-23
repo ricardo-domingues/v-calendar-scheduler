@@ -4,7 +4,12 @@
          :class="eventClasses"
          @click.stop="eventClicked"
          :style="eventStyles">
-        <span class="v-cal-event-time">{{ event.startTime | formatEventTime(use12) }}</span>
+         <div class="row">
+             <div class="col">
+                 <span class="v-cal-event-time">{{ event.startTime | formatEventTime(use12) }} / {{ event.endTime | formatEventTime(use12) }}h - Manuel Faria</span>
+             </div>
+         </div>
+        <span class="v-cal-event-time ml-2">Dra. Ana Simões</span>
         <span class="v-cal-event-name">{{ event.displayText }}</span>
     </div>
 </template>
@@ -63,7 +68,7 @@
 
                 const hours = end.diff(this.event.startTime, 'hours', true);
                 const bordersOffset = hours - 1;
-                return  ( hours * this.ancestorHeight ) + bordersOffset;
+                return ( hours * this.ancestorHeight ) + bordersOffset;
             },
             eventStyles() {
 

@@ -29,8 +29,7 @@
                         :key="index"
                         :event="event"
                         :has-dynamic-size="false"
-                        :use12="use12"
-                        :class="{'has-appointment': isAvailable(day, event) }">
+                        :use12="use12">
                 </event-item>
 
               </div>
@@ -43,22 +42,24 @@
             <span class="v-cal-day__hour-block-fill">{{ time | formatTime(use12) }}</span>
             <div class="v-cal-day__hour-content">
               <div class="v-cal-event-list">
-                <event-item
-                        v-for="event, index in day.events"
-                        :key="index"
-                        :event="event"
-                        :use12="use12"
-                        v-if="event.startTime && time.hours() === event.startTime.hours()">
-                </event-item>
                 <availability-item
                         v-for="event, index in day.availabilities"
-                        :id="`v-cal-appointment-${index}`"
                         :key="index"
+                        :showTitle="showTitle"
                         :event="event"
                         :use12="use12"
                         :class="isAvailable(day, time, event)"
                         v-if="event.startTime && time.hours() === event.startTime.hours()">
                 </availability-item>
+                <event-item
+                        v-for="event, index in day.events"
+                        :key="index"
+                        :event="event"
+                        :use12="use12"
+                        v-if="event.startTime && time.hours() === event.startTime.hours()"
+                        class="event-item-cal"
+                        >
+                </event-item>
               </div>
             </div>
           </div>
@@ -83,11 +84,17 @@
         components: { EventItem, AvailabilityItem },
         data() {
             return {
+                size: 0,
+                test: '',
                 days: [],
+                hideTitle: false
                 // newEvents: JSON.parse(JSON.stringify(this.events))
             }
         },
         mounted() {
+            if(this.availabilities[0]){
+                this.hideTitle = this.availabilities[0].hideTitle
+            }
             this.buildCalendar();
         },
         methods: {
@@ -97,6 +104,9 @@
             isAvailable(date, time, event){
                 let day = date.d.format('YYYY-MM-DD')
                 let formatedHour = moment(time).format('HH:mm');
+                if(!this.showBorders){
+                    return
+                }
 
                 if(!event.appointments || event.appointments.length === 0){
                     return 'is-available'
@@ -115,8 +125,9 @@
                     if(nextStartTime && moment.duration(nextStartTime.diff(endTime)).asMinutes() >= 30){
                         return 'has-appointment'
                     }
-
-                    return 'has-appointment is-full'
+                    if(i === event.appointments.length - 1){
+                        return 'has-appointment is-full'
+                    }
                 }
             },
             buildCalendar() {
@@ -138,19 +149,19 @@
                         .sort( (a, b) => {
                             if ( !a.startTime ) return -1;
                             if ( !b.startTime ) return 1;
-                            return moment(a.startTime).format('HH') - moment(b.startTime).format('HH');
+                            return moment(a.startTime).format('HH:mm') - moment(b.startTime).format('HH:mm');
                         });
 
                     const mappedEvents = dayEvents.map( event => {
                         event.overlaps = dayEvents.filter( e => moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime) ) && e !== event ).length;
                         return event;
                     });
-
+                    
                     const dayAvailabilities = this.availabilities.filter( e => e.date.isSame(day, 'day') )
                         .sort( (a, b) => {
                             if ( !a.startTime ) return -1;
                             if ( !b.startTime ) return 1;
-                            return moment(a.startTime).format('HH') - moment(b.startTime).format('HH');
+                            return moment(a.startTime).format('HH:mm') - moment(b.startTime).format('HH:mm');
                         });
 
                     const mappedAvailabilities = dayAvailabilities.map( event => {
@@ -197,8 +208,13 @@
 }
 */
 
+.v-cal-event-list{
+    position: relative!
+}
+
 .has-appointment{
     border-left: 5px solid orange;
+    position: static;
 }
 
 .is-available{
@@ -209,4 +225,10 @@
     border-left: 5px solid red;
 }
 
+.event-item-cal{
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+}
 </style>

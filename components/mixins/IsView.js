@@ -20,6 +20,13 @@ export default {
         },
         availabilities: {
             type: Array
+        },
+        showTitle: {
+            type: Boolean
+        },
+        showBorders: {
+            type: Boolean,
+            default: true
         }
     },
     methods: {

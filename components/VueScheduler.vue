@@ -53,6 +53,13 @@
                 type: Array,
                 default: () => []
             },
+            showTitle: {
+                type: Boolean
+            },
+            showBorders: {
+                type: Boolean,
+                default: true
+            },
             calendarType: {
                 type: String,
                 default: () => 'events'
@@ -127,10 +134,6 @@
             eventDisplay: {
                 type: [String, Function],
                 default: () => config.eventDisplay
-            },
-            avaidisplay: {
-                type: [String, Function],
-                default: () => config.availabilityDisplay
             },
             disableDialog: {
                 type: Boolean,
@@ -257,8 +260,6 @@
             activeViewProps() {
                 let props = {
                     activeDate: this.activeDate,
-                    minDate: this.minDate,
-                    maxDate: this.maxDate,
                     use12: this.use12,
                     events: this.newEvents.filter( event => {
                         return event.date.isSame(this.activeDate, this.activeView);
@@ -273,6 +274,8 @@
                     props.timeRange = this.timeRange;
                     props.showTimeMarker = this.showTimeMarker;
                     props.availabilities = this.availabilities;
+                    props.showTitle = this.showTitle;
+                    props.showBorders = this.showBorders;
                 }
                 return props;
             },
