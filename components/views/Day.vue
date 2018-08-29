@@ -64,6 +64,7 @@
                                         :key="index"
                                         :event="event"
                                         :use12="use12"
+                                        :showTitle="showTitle"
                                         :class="isAvailable(time, event)">
                                 </availability-item>
                                 <event-item
