@@ -142,6 +142,10 @@
             eventDialogConfig: {
                 type: Object,
                 default: () => { return {} }
+            },
+            audiologists: {
+                type: Array,
+                default: () => []
             }
         },
         data() {
@@ -238,11 +242,6 @@
                     return new Event(e).bindGetter('displayText', this.eventDisplay);
                 });
             },
-            newAvailabilities () {
-                return this.availabilities.map(a => {
-                    return new Availability(a).bindGetter('displayText', this.availabilityDisplay);
-                })
-            },
             isPrevAllowed() {
                 if ( this.minDate ) {
                     const prevRef = moment(this.activeDate).subtract(1, this.activeView + 's');
@@ -264,9 +263,9 @@
                     events: this.newEvents.filter( event => {
                         return event.date.isSame(this.activeDate, this.activeView);
                     }),
-                    availabilities: this.newAvailabilities.filter( availability => {
+                    availabilities: this.availabilities.filter( availability => {
                         return availability.date.isSame(this.activeDate, this.activeView);
-                    }),
+                    })
                 };
 
                 if ( this.activeView === 'week' || this.activeView === 'day') {
@@ -276,6 +275,9 @@
                     props.availabilities = this.availabilities;
                     props.showTitle = this.showTitle;
                     props.showBorders = this.showBorders;
+                }
+                if(this.activeView === 'day'){
+                    props.audiologists = this.audiologists
                 }
                 return props;
             },

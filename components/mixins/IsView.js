@@ -27,6 +27,9 @@ export default {
         showBorders: {
             type: Boolean,
             default: true
+        },
+        audiologists: {
+            type: Array
         }
     },
     methods: {

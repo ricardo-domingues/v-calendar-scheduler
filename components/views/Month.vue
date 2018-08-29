@@ -14,6 +14,7 @@
                  'is-different-month': day.isDifferentMonth }" v-for="day in row">
                 <span class="v-cal-day__number">{{ day.d.date() }}</span>
                 <div class="v-cal-event-list">
+                    <!--
                     <event-item
                             v-for="event, index in day.events"
                             :key="index"
@@ -21,7 +22,7 @@
                             :event="event"
                             :use12="use12"
                             :class="{'has-appointment': isAvailable(day, event) }">
-                    </event-item>
+                    </event-item>-->
                     <availability-item
                         v-for="event, index in day.availabilities"
                         :id="`v-cal-appointment-${index}`"
@@ -183,4 +184,13 @@
 .is-full{
     border-left: 5px solid red;
 }
+
+.v-cal-event-list{
+    position: relative;
+}
+
+.event-item-cal{
+    position: absolute;
+}
+
 </style>

@@ -1,16 +1,15 @@
 <template>
     <div ref="event_block" class="v-cal-event-item"
-         :title="event.startTime | formatEventTime(use12) + ' - ' + event.displayText"
+         :title="'Horário: ' + event.startTime.format('HH:mm') + ' - ' + event.endTime.format('HH:mm') + '\n Paciente: ' + event.patient.name + ' - ' + event.patient.phone + '\n Possui dificuldades motoras: ' + hasWalkingProblem" 
          :class="eventClasses"
          @click.stop="eventClicked"
          :style="eventStyles">
          <div class="row">
              <div class="col">
-                 <span class="v-cal-event-time">{{ event.startTime | formatEventTime(use12) }} / {{ event.endTime | formatEventTime(use12) }}h - Manuel Faria</span>
+                 <span class="v-cal-event-time">{{ event.patient.name }} <i v-if="event.patient.access === 1" class="fa fa-wheelchair float-right"></i></span>
              </div>
          </div>
-        <span class="v-cal-event-time ml-2">Dra. Ana Simões</span>
-        <span class="v-cal-event-name">{{ event.displayText }}</span>
+        <span v-if="event.audiologist" class="v-cal-event-time ml-2">{{ event.audiologist.name }}</span>
     </div>
 </template>
 
@@ -40,6 +39,7 @@
             }
         },
         mounted() {
+            console.log(this.event)
             if ( this.hasDynamicSize ) {
                 this.getAndSetAncestorHeight();
                 window.addEventListener('resize', this.getAndSetAncestorHeight);
@@ -67,8 +67,8 @@
                 const end = this.event.endTime.hours() > 0 ? moment(this.event.endTime) : moment(this.event.endTime).add(1, 'days');
 
                 const hours = end.diff(this.event.startTime, 'hours', true);
-                const bordersOffset = hours - 1;
-                return ( hours * this.ancestorHeight ) + bordersOffset;
+                const bordersOffset = (hours * 2) - 1;
+                return ( (hours * 2) * this.ancestorHeight ) + bordersOffset;
             },
             eventStyles() {
 
@@ -90,13 +90,14 @@
                             'left': width + '%'
                         });
                     }
-
-                    if ( this.event.startTime.minutes() > 0 ) {
+                    
+                    if ( this.event.startTime.minutes() != 0 && this.event.startTime.minutes() != 30 ) {
                         const distance = ( this.ancestorHeight / 60 ) * this.event.startTime.minutes();
                         styles.push({
                             'top': distance + 'px'
                         });
                     }
+                    
                 }
 
                 return styles;
@@ -105,6 +106,9 @@
                 return {
                     'is-overlapping': this.event.overlaps > 0
                 }
+            },
+            hasWalkingProblem () {
+                return this.event.patient.access === 1 ? 'Sim' : 'Não'
             }
         },
         filters: {
@@ -114,8 +118,11 @@
 
                 if ( use12 )
                     return hour.format( hour.minutes() > 0 ? 'h.mma' : 'ha' ).slice(0, -1);
-
-                return hour.format( hour.minutes() > 0 ? 'HH.mm' : 'HH' );
+                if (hour === undefined) {
+                    return ''
+                }
+                console.log(hour)
+               // return hour.format( hour.minutes() > 0 ? 'HH.mm' : 'HH' );
             }
         },
     }

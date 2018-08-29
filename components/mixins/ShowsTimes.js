@@ -25,9 +25,11 @@ export default {
       let times = [];
       for ( let i = this.timeRange[0]; i < this.timeRange[1] + 1; i++ ) {
         const momentTime = moment(i, 'HH:mm');
-        // const momentTime2 = moment(i, 'HH:mm').add(30, 'minutes')
+        const momentTime2 = moment(i, 'HH:mm').add(30, 'minutes')
         times.push(momentTime);
-        // times.push(momentTime2);
+        if(momentTime.hours() < 20){
+          times.push(momentTime2);
+        }
       }
       return times;
     },

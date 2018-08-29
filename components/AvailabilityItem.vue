@@ -1,11 +1,11 @@
  <template>
     <div ref="event_block" class="v-cal-event-item custom-availability-filled"
-         :title="event.startTime | formatEventTime(use12) + 'h - ' + event.staff.name + ' - ' + event.entity + ' - ' + event.local.room +' - ' + event.service.name" 
+         :title="event.startTime | formatEventTime(use12) + 'h - ' + event.staff.name + ' - ' + event.entity + ' - ' + event.local.room"
          :class="eventClasses"
          @click.stop="availabilityClicked"
          :style="eventStyles">
          <div class="row">
-            <div class="col-md-12 col-xl-12">
+            <div class="col-md-12 col-6">
                 <span v-if="showTitle" class="v-cal-event-time vuestic-icon vuestic-icon-time"></span>
                 <span v-if="showTitle" class="v-cal-event-time" >{{ event.startTime | formatEventTime(use12) }}h - {{ event.endTime | formatEventTime(use12) }}h</span>
             </div>
@@ -15,10 +15,8 @@
             <div class="col">
                  <span v-if="showTitle" class="v-cal-event-name">{{ event.local.room }}</span>
             </div>
-            <!--<div class="col">
-                <span class="v-cal-event-name">{{ event.service.name }}</span>
-            </div>-->
          </div>
+
     </div>
 </template>
 
@@ -49,15 +47,14 @@
         data() {
             return {
                 ancestorHeight: 0,
-                lastDrawPoint: 0,
-                linearGradientString: ''
+                lastDrawPoint: 0
             }
         },
         mounted() {
-            // this.getAndSetAncestorHeight();
             if ( this.hasDynamicSize ) {
                 this.getAndSetAncestorHeight();
                 window.addEventListener('resize', this.getAndSetAncestorHeight);
+
             }
         },
         beforeDestroy() {
@@ -74,19 +71,17 @@
             findAncestor (el, cls) {
                 while ((el = el.parentElement) && !el.classList.contains(cls)) ;
                 return el;
-            },
-            calculateHeight (start, end, value) {
-                return (1 - value) * start + value * end
             }
         },
         computed: {
             displayHeight() {
-
                 const end = this.event.endTime.hours() > 0 ? moment(this.event.endTime) : moment(this.event.endTime).add(1, 'days');
-
                 const hours = end.diff(this.event.startTime, 'hours', true);
-                const bordersOffset = hours - 1;
-                return  ( hours * this.ancestorHeight ) + bordersOffset ;
+                const minutes = end.diff(this.event.startTime, 'minutes');
+
+                const bordersOffset = (hours * 2) - 1;
+                console.log((hours * 2) * this.ancestorHeight + bordersOffset)
+                return ( (hours * 2) * this.ancestorHeight ) + bordersOffset;
             },
             eventStyles() {
                 
@@ -109,8 +104,8 @@
                         });
                     }
 
-                    if ( this.event.startTime.minutes() > 0 ) {
-                        const distance = ( this.ancestorHeight / 60 ) * this.event.startTime.minutes();
+                    if ( this.event.startTime.minutes() != 0 && this.event.startTime.minutes() != 30) {
+                        const distance = ( this.ancestorHeight / 30 ) * this.event.startTime.minutes();
                         styles.push({
                             'top': distance + 'px'
                         });

@@ -14,11 +14,12 @@
     <div class="v-cal-days">
 
       <div class="v-cal-times">
-        <div class="v-cal-hour all-day">{{ allDayLabel }}</div>
+        <!--<div class="v-cal-hour all-day">{{ allDayLabel }}</div>-->
         <div class="v-cal-hour" :class="{ 'is-now': time.isSame(now, 'hour') }" v-for="time in times">{{ time | formatTime(use12) }}</div>
       </div>
       <div class="v-cal-days__wrapper">
         <div class="v-cal-day v-cal-day--week" v-for="day in days" :class="{'is-disabled': day.isDisabled}">
+            <!--
           <div class="v-cal-day__hour-block"
                @click="timeClicked({ date: day.d.toDate(), time: null })">
             <span class="v-cal-day__hour-block-fill">00:00 <template v-if="use12">PM</template></span>
@@ -35,6 +36,7 @@
               </div>
             </div>
           </div>
+      -->
 
           <div class="v-cal-day__hour-block"
                @click="timeClicked({ date: day.d.toDate(), time: time.hour() })"
@@ -47,16 +49,18 @@
                         :key="index"
                         :showTitle="showTitle"
                         :event="event"
+                        :appointments="event.appointments"
                         :use12="use12"
                         :class="isAvailable(day, time, event)"
-                        v-if="event.startTime && time.hours() === event.startTime.hours()">
+                        v-if="event.startTime && time.hours() === event.startTime.hours() && time.minutes() === event.startTime.minutes()">
+
                 </availability-item>
                 <event-item
                         v-for="event, index in day.events"
                         :key="index"
                         :event="event"
                         :use12="use12"
-                        v-if="event.startTime && time.hours() === event.startTime.hours()"
+                        v-if="event.startTime && time.hours() === event.startTime.hours() && isValid(time, event)"
                         class="event-item-cal"
                         >
                 </event-item>
@@ -98,6 +102,9 @@
             this.buildCalendar();
         },
         methods: {
+            isValid (time, event) {
+                return time.format('HH:mm') === event.startTime.format('HH:mm')
+            },
             timeClicked(data) {
                 EventBus.$emit('time-clicked', data)
             },
@@ -134,7 +141,6 @@
                 //  Reset events
                 // this.newEvents = JSON.parse(JSON.stringify(this.events));
                 this.days = [];
-
                 let now = moment();
 
                 let temp = moment( this.activeDate ).day(moment.localeData().firstDayOfWeek());
@@ -152,22 +158,49 @@
                             return moment(a.startTime).format('HH:mm') - moment(b.startTime).format('HH:mm');
                         });
 
-                    const mappedEvents = dayEvents.map( event => {
-                        event.overlaps = dayEvents.filter( e => moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime) ) && e !== event ).length;
-                        return event;
-                    });
-                    
                     const dayAvailabilities = this.availabilities.filter( e => e.date.isSame(day, 'day') )
                         .sort( (a, b) => {
                             if ( !a.startTime ) return -1;
                             if ( !b.startTime ) return 1;
                             return moment(a.startTime).format('HH:mm') - moment(b.startTime).format('HH:mm');
                         });
-
                     const mappedAvailabilities = dayAvailabilities.map( event => {
-                        event.overlaps = dayAvailabilities.filter( e => moment(event.start_time).isBetween( moment(e.start_time), moment(e.end_time) ) && e !== event ).length;
+                        /*
+                        event.overlaps = dayAvailabilities.filter( e =>  {
+                            moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime), null, '[]') }).length;
+                        console.log(event.overlaps)
+                        return event;
+                        */
+                        
+                        let counter = 0;
+                        for(var i=0; i < dayAvailabilities.length; i++){
+                            let _startTime = moment(dayAvailabilities[i].startTime)
+                            let _endTime = moment(dayAvailabilities[i].endTime)
+                            let eventStartTime = moment(event.startTime)
+                            if(eventStartTime.isBetween(_startTime, _endTime)){
+                                counter ++;
+                            }
+                        }
+                        event.overlaps = counter;
+                        counter = 0;
+                        
                         return event;
                     });
+                    
+
+                    const mappedEvents = dayEvents.map( event => {
+                        /*
+                        let counter = dayAvailabilities.filter( e => moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime) ) && e.id !== event.availability_id ).length;
+                        event.overlaps = counter
+                        */
+                        dayAvailabilities.forEach(a => {
+                            if(event.availability_id === a.id){
+                                event.overlaps = a.overlaps
+                            }
+                        })
+                        return event;
+                    });
+                    
 
                     let newDay = {
                         d: day,
@@ -208,13 +241,9 @@
 }
 */
 
-.v-cal-event-list{
-    position: relative!
-}
 
 .has-appointment{
     border-left: 5px solid orange;
-    position: static;
 }
 
 .is-available{
@@ -225,10 +254,12 @@
     border-left: 5px solid red;
 }
 
+.v-cal-event-list{
+    position: relative;
+}
+
 .event-item-cal{
     position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
 }
+
 </style>
