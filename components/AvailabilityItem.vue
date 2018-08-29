@@ -77,10 +77,8 @@
             displayHeight() {
                 const end = this.event.endTime.hours() > 0 ? moment(this.event.endTime) : moment(this.event.endTime).add(1, 'days');
                 const hours = end.diff(this.event.startTime, 'hours', true);
-                const minutes = end.diff(this.event.startTime, 'minutes');
 
                 const bordersOffset = (hours * 2) - 1;
-                console.log((hours * 2) * this.ancestorHeight + bordersOffset)
                 return ( (hours * 2) * this.ancestorHeight ) + bordersOffset;
             },
             eventStyles() {

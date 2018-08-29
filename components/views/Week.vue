@@ -15,10 +15,10 @@
 
       <div class="v-cal-times">
         <!--<div class="v-cal-hour all-day">{{ allDayLabel }}</div>-->
-        <div class="v-cal-hour" :class="{ 'is-now': time.isSame(now, 'hour') }" v-for="time in times">{{ time | formatTime(use12) }}</div>
+        <div class="v-cal-hour" :class="{ 'is-now': time.isSame(now, 'hour')}" v-for="time in times">{{ time | formatTime(use12) }}</div>
       </div>
       <div class="v-cal-days__wrapper">
-        <div class="v-cal-day v-cal-day--week" v-for="day in days" :class="{'is-disabled': day.isDisabled}">
+        <div class="v-cal-day v-cal-day--week" v-for="day in days" :class="{'is-disabled': day.isDisabled, 'is-past': day.isPast}">
             <!--
           <div class="v-cal-day__hour-block"
                @click="timeClicked({ date: day.d.toDate(), time: null })">

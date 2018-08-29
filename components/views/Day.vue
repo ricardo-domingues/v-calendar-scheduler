@@ -43,7 +43,7 @@
 
     <div v-else>
         <div class="v-cal-weekdays">
-            <div class="v-cal-weekday-item">{{ activeDate.format('ddd DD/MM') }}</div>
+            <div class="v-cal-weekday-item" v-if="audiologistHasAvailability(value.id)" v-for="value in audiologists"> {{ value.name }}</div>
         </div>
         <div class="v-cal-days">
             <div class="v-cal-times">
@@ -51,7 +51,7 @@
                 <div class="v-cal-hour" :class="{ 'is-now': time.isSame(now, 'hour') }" v-for="time in times">{{ time | formatTime(use12) }}</div>
             </div>
             <div class="v-cal-days__wrapper">
-                <div class="v-cal-day v-cal-day--day" :class="{ 'is-today': day.isToday }" v-if="day !== null">
+                <div class="v-cal-day v-cal-day--week" v-for="audiologist in audiologists" :class="{ 'is-today': day.isToday }" v-if="day !== null && audiologistHasAvailability(audiologist.id)">
                     <div class="v-cal-day__hour-block"
                          @click="timeClicked({ date: day.d.toDate(), time: time.hour() })"
                          :class="[ time.isSame(now, 'hour') ? 'is-now' : '', hourClass ]" v-for="time in day.availableTimes">
@@ -60,7 +60,7 @@
                             <div class="v-cal-event-list">
                                 <availability-item
                                         v-for="event, index in day.availabilities"
-                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm')"
+                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm') && audiologist.id === event.staff.id"
                                         :key="index"
                                         :event="event"
                                         :use12="use12"
@@ -68,7 +68,7 @@
                                 </availability-item>
                                 <event-item
                                         v-for="event, index in day.events"
-                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm')"
+                                        v-if="event.startTime && time.format('HH:mm') === event.startTime.format('HH:mm') && audiologist.id === event.audiologist.id"
                                         :key="index"
                                         :event="event"
                                         :use12="use12"
@@ -165,12 +165,13 @@
                     */
 
                     const mappedAvailabilities = dayAvailabilities.map( event => {
-                        /*
+                        
                         event.overlaps = dayAvailabilities.filter( e =>  {
                             moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime)) }).length;
                         console.log(event.overlaps)
                         return event;
-                        */
+                        
+                        /*
                         let counter = 0;
                         for(var i=0; i < dayAvailabilities.length; i++){
                             let _startTime = moment(dayAvailabilities[i].startTime)
@@ -182,6 +183,7 @@
                         }
                         event.overlaps = counter;
                         return event;
+                        */
                     });
 
                     const mappedEvents = dayEvents.map( event => {
@@ -190,12 +192,14 @@
                                 event.audiologist = e.staff
                             }
                             moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime) ) && e.id !== event.availability_id }).length;
-
+                        /*
                         dayAvailabilities.forEach(a => {
                             if(event.availability_id === a.id){
                                 event.overlaps = a.overlaps
                             }
                         })
+                        */
+                        event.overlaps = counter;
                         return event;
                     });
                 this.day = {
