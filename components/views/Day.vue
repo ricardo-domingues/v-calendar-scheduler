@@ -169,7 +169,6 @@
                         
                         event.overlaps = dayAvailabilities.filter( e =>  {
                             moment(event.startTime).isBetween( moment(e.startTime), moment(e.endTime)) }).length;
-                        console.log(event.overlaps)
                         return event;
                         
                         /*
@@ -213,7 +212,6 @@
                 };
             },
             audiologistHasAvailability (id) {
-                console.log('lol')
                 for (var i = 0; i < this.day.availabilities.length; i++) {
                     if(this.day.availabilities[i].staff.id === id){
                         return true

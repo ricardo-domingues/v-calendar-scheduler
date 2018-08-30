@@ -39,7 +39,6 @@
             }
         },
         mounted() {
-            console.log(this.event)
             if ( this.hasDynamicSize ) {
                 this.getAndSetAncestorHeight();
                 window.addEventListener('resize', this.getAndSetAncestorHeight);
@@ -121,7 +120,6 @@
                 if (hour === undefined) {
                     return ''
                 }
-                console.log(hour)
                // return hour.format( hour.minutes() > 0 ? 'HH.mm' : 'HH' );
             }
         },
