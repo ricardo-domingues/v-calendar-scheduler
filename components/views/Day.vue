@@ -212,12 +212,14 @@
                 };
             },
             audiologistHasAvailability (id) {
-                for (var i = 0; i < this.day.availabilities.length; i++) {
-                    if(this.day.availabilities[i].staff.id === id){
-                        return true
+                if(this.day){
+                
+                    for (var i = 0; i < this.day.availabilities.length; i++) {
+                        if(this.day.availabilities[i].staff.id === id){
+                            return true
+                        }
                     }
                 }
-
                 return false
             }
         }
